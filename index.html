@@ -1,40 +1,240 @@
-<!doctype html>
+<!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
 
-		<title>reveal.js</title>
+    <title>Paripa 3rd Semester</title>
 
-		<link rel="stylesheet" href="dist/reset.css">
-		<link rel="stylesheet" href="dist/reveal.css">
-		<link rel="stylesheet" href="dist/theme/black.css">
+    <link rel="stylesheet" href="dist/reset.css" />
+    <link rel="stylesheet" href="dist/reveal.css" />
+    <link rel="stylesheet" href="dist/theme/night.css" />
 
-		<!-- Theme used for syntax highlighted code -->
-		<link rel="stylesheet" href="plugin/highlight/monokai.css">
-	</head>
-	<body>
-		<div class="reveal">
-			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
-			</div>
-		</div>
+    <!-- Theme used for syntax highlighted code -->
+    <link rel="stylesheet" href="plugin/highlight/monokai.css" />
+  </head>
+  <body>
+    <div class="reveal">
+      <div class="slides">
+        <section data-markdown>
+          <textarea data-template>
+				## Linux Kernel Configuration Reconstruction
+				### Domonkos Pálvölgyi
+			</textarea
+          >
+        </section>
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+				### Why do we need to reconstruct the configuration?
 
-		<script src="dist/reveal.js"></script>
-		<script src="plugin/notes/notes.js"></script>
-		<script src="plugin/markdown/markdown.js"></script>
-		<script src="plugin/highlight/highlight.js"></script>
-		<script>
-			// More info about initialization & config:
-			// - https://revealjs.com/initialization/
-			// - https://revealjs.com/config/
-			Reveal.initialize({
-				hash: true,
+				- To run software designed for a specific device in a virtual machine
+				- To test this software in an isolated environment
+				Note:
+				Kell a kernel konfigurációja, hogy tudjuk modositani hogy elmenjen qEmuval.
 
-				// Learn about plugins: https://revealjs.com/plugins/
-				plugins: [ RevealMarkdown, RevealHighlight, RevealNotes ]
-			});
-		</script>
-	</body>
+				---
+
+				### End goal of the project
+
+				To be able to reconstruct the configuration of the Linux kernel from a kernel binary
+				with the least amount of user input possible.
+
+				Spoiler Alert <!-- .element: class="fragment" data-fragment-index="1" -->
+				  </textarea
+            >
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+					## Previous Work
+
+					---
+
+					### [kconfig_rs](https://github.com/FlyinPancake/kconfig_rs)
+
+					- Rust library for parsing Kconfig files
+					- Can be used to enumerate and query the configuration options
+
+					---
+
+					### Researched the Kbuild system
+
+					- Kbuild is the build system used by the Linux kernel
+					- It consists of a set of Makefiles and Kconfig files
+
+					---
+
+					### Smaller projects
+
+					- string extractor
+					- config file generator
+			</textarea
+            >
+          </section>
+        </section>
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+			## Starting Point
+			- The goal was to use the string literals in the source code to act as indicators for the configuration options.
+			- The approach should not be considered a failure, but the implementation was lacking crucial features.
+			- The approach from the previous semester was unable to yield remotely usable results
+
+			---
+
+			### Problems with the previous approach
+			- The static analyzer ignored that files can be conditionally compiled
+			- `#if defined(CONFIG_FOO)` style conditionals were ignored
+			- Dependencies defined in Kconfig files were ignored
+
+
+			---
+
+			### Improvement idea
+
+			1. Make a static analyzer that can output expressions for a like of code to be compiled into the kernel (e.g.: `CONFIG_FOO && CONFIG_BAR`)
+			2. Run this static analyzer for every unique string in the kernel source code.
+			3. We get a set of expressions for every string in the kernel source code. 
+			---
+
+			### Improvement idea (cont.)
+
+			4. There are powerful tools for solving boolean satisfiability problems (SAT)
+			5. We can use these tools to find a configuration that satisfies all the expressions for a string
+			6. We can then use this configuration to compile the kernel and check if the string exists in the compiled kernel
+
+			---
+
+			### Possible problems
+
+			- The configuration space is too large to be solved by any SAT solver
+			- The SAT solver is too slow to solve the problem
+			- There are too many configurations that might satisfy the expressions
+			- Any error in the static analyzer will lead to a wrong configuration
+		</textarea
+            >
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+				## Processing the preprocessor output
+
+				We use the Kbuild system to generate the preprocessed source code and check if a string exists.
+
+				---
+
+				### String locking vs Config locking approach 
+
+				Note:
+				Up until this point we only looked at string locking approaches.
+				There are also config locking approaches.
+				We can imagine these like mazes where we have to find a path from the start to the end.
+				There is a popular maze solving method to go from the end to the start.
+				This is what we do in the config locking approach.
+				---
+				String Locking                               | Config Locking
+				-------------------------------------------- | --------------------------------------------
+				![string_locking](images/string_locking.svg) | ![config_locking](images/config_locking.svg)
+
+				---
+				### Getting the preprocessed source code
+
+				- `gcc -E` is used to run the compiler up to the preprocessor stage
+				- However we use the Kbuild in the context of Linux
+				- The Kbuild system has an `*.i` target that generates the preprocessed source code
+
+
+				---
+
+				### Getting the preprocessed source code (cont.)
+
+				- Every C source file in the kernel has a corresponding `*.i` target
+				- If the source file would not be compiled into the kernel, the `*.i` target is not generated
+				- Otherwise the `*.i` file contians the preprocessed source code
+
+				---
+				### Using the preprocessed source code
+
+				![preprocess_workflow](images/preprocess_workflow.svg)
+
+				---
+
+				### Problems with this approach
+
+				- The number of unique configuration options is simply too large (there are over 10000 options)
+				- We can make guesses comparing strings from our tested configurations with strings from the known configurations
+				- We need to find a way to reduce the number of configurations to test
+
+
+			</textarea
+            >
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+				### Mini-Projects During the Semester
+
+				Throughout the semester we worked on smaller projects to help us with the main project.
+
+				---
+
+				### Creating a preprocessed kernel source files
+
+				We need a reliable way to generate the preprocessed source code for the files in the kernel source code.
+
+				--------------------------------------------
+				```bash
+				gcc -E source.c > source.i
+				```
+				Works for a single file, but not for the whole kernel
+				
+				Adding `-E` to the `CFLAGS` in the Makefile breaks the build system
+
+				---
+				```
+				make -C /path/to/kernel/source.i
+				```
+				Works, but:
+				- It is slow
+				- It is not script friendly
+
+				Note:
+				- doesnt always create the .i files
+				- -j flag doesnt work
+				- slower than compiling the kernel (due to the many I/O operations) 
+
+				
+			</textarea
+            >
+          </section>
+        </section>
+      </div>
+    </div>
+
+    <script src="dist/reveal.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script>
+      // More info about initialization & config:
+      // - https://revealjs.com/initialization/
+      // - https://revealjs.com/config/
+      Reveal.initialize({
+        hash: true,
+        // Learn about plugins: https://revealjs.com/plugins/
+        plugins: [RevealMarkdown, RevealHighlight, RevealNotes, RevealZoom],
+      });
+    </script>
+  </body>
 </html>
