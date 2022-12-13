@@ -81,6 +81,19 @@
 					- stringhunter: finds the strings in the source code blocks and extracts them
 					- ink-checker: config generator that uses the extracted strings and a kernel binary
 					 to make an educated guess about the configuration
+					
+					---
+					### Test results
+
+					```txt
+					Original options: 675
+					Reconstructed options: 375
+					Common options: 90
+					Missed options: 585
+					Misidentified options: 285
+					The reconstruction was 13.33 % accurate.
+					The reconstruction has 316.67 % extra options.   
+					```
 			</textarea
             >
           </section>
@@ -96,7 +109,7 @@
 			---
 
 			### Problems with the previous approach
-			- The static analyzer ignored that files can be conditionally compiled
+			- The static analyser ignored that files can be conditionally compiled
 			- `#if defined(CONFIG_FOO)` style conditionals were ignored
 			- Dependencies defined in Kconfig files were ignored
 
@@ -108,8 +121,8 @@
 
 			### Improvement idea #1
 
-			1. Make a static analyzer that can output expressions for a line of code to be compiled into the kernel (e.g.: `CONFIG_FOO && CONFIG_BAR`)
-			2. Run this static analyzer for every unique string in the kernel source code.
+			1. Make a static analyser that can output expressions for a line of code to be compiled into the kernel (e.g.: `CONFIG_FOO && CONFIG_BAR`)
+			2. Run this static analyser for every unique string in the kernel source code.
 			3. That yields a set of expressions for every string in the kernel source code. 
 			---
 
@@ -123,10 +136,9 @@
 
 			### Possible problems
 
-			- The configuration space is too large to be solved by any SAT solver
-			- The SAT solver is too slow to solve the problem
-			- There are too many configurations that might satisfy the expressions
-			- Any error in the static analyzer will lead to a wrong configuration 
+			- The SAT solver may be too slow to solve the problem, due to the size of the problem
+			- There are too many configurations that might satisfy the expressions 
+			- Any error in the static analyser will lead to a wrong configuration 
 			
 			---
 			### Improvement idea #2
@@ -137,7 +149,7 @@
 			We need to find the config that produces a desired preprocessed source code.
 
 			---
-			![analyzer vs preprocessor](images/analyzer_vs_preprocessor.excalidraw.svg)
+			![analyser vs preprocessor](images/analyzer_vs_preprocessor.excalidraw.svg)
 
 		</textarea
             >
@@ -302,6 +314,12 @@
           <section data-markdown>
             <textarea data-template>
 				## Thank you for your attention!
+
+				Note:
+				Szeretném megköszönni a figyelmet 
+				és a lehetőséget, hogy a paripa programban részt vehettem.
+				A CUJOnál mindenkinek köszönöm a segítőkész hozzáállást,
+				és elnézést kérek hogy nem kérdeztem eleget.
 			</textarea
             >
           </section>
