@@ -23,6 +23,10 @@
           <textarea data-template>
 				## Linux Kernel Configuration Reconstruction
 				#### Domonkos Pálvölgyi
+
+				--------------------------------------------
+
+				[flyinpancake.github.io/paripa3](https://flyinpancake.github.io/paripa3)
 			</textarea
           >
         </section>
@@ -73,8 +77,10 @@
 
 					### Smaller projects
 
-					- string extractor
-					- config file generator
+					- sourcehunter: finds the `#ifdef` guarded source blocks, and extracts them
+					- stringhunter: finds the strings in the source code blocks and extracts them
+					- ink-checker: config generator that uses the extracted strings and a kernel binary
+					 to make an educated guess about the configuration
 			</textarea
             >
           </section>
@@ -221,13 +227,14 @@
 				- Kbuild is the build system used by the Linux kernel
 				- It consists of a set of Makefiles and Kconfig files
 
-				
+				---
+				### Front end for the string literal extractor `hardcodes`
 			</textarea
             >
           </section>
         </section>
 
-        <section>
+        <!-- <section>
           <section data-markdown>
             <textarea data-template>
 					## Future Work
@@ -242,7 +249,7 @@
 				</textarea
             >
           </section>
-        </section>
+        </section> -->
 
         <section>
           <section data-markdown>
@@ -256,6 +263,13 @@
 					- How to use and modify the Kbuild system
 					- How the Linux kernel is architectured
 					- How to write efficient parsers
+
+					---
+					#### Don't make a graph of everything
+
+					![graph of everything](images/linux_deps.png)
+					Graph of every dependency in the Linux kernel
+
 
 					---
 					### Viability of the project
