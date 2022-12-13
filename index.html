@@ -22,7 +22,7 @@
         <section data-markdown>
           <textarea data-template>
 				## Linux Kernel Configuration Reconstruction
-				### Domonkos Pálvölgyi
+				#### Domonkos Pálvölgyi
 			</textarea
           >
         </section>
@@ -34,7 +34,7 @@
 				- To run software designed for a specific device in a virtual machine
 				- To test this software in an isolated environment
 				Note:
-				Kell a kernel konfigurációja, hogy tudjuk modositani hogy elmenjen qEmuval.
+				Kell a kernel konfigurációja, hogy tudjuk modositani hogy elmenjen Qemuval.
 
 				---
 
@@ -44,6 +44,14 @@
 				with the least amount of user input possible.
 
 				Spoiler Alert <!-- .element: class="fragment" data-fragment-index="1" -->
+				---
+				### Constraints (for now)
+
+				- The kernel must be built from a source code that's publicly available on the internet.
+				- We do not use kernel modules.
+				- We generally do not care about numeric (integer or hex) options.
+				- Our main focus is on the ARM and MIPS architectures since these are common in IoT settings.
+				
 				  </textarea
             >
           </section>
@@ -60,13 +68,6 @@
 
 					- Rust library for parsing Kconfig files
 					- Can be used to enumerate and query the configuration options
-
-					---
-
-					### Researched the Kbuild system
-
-					- Kbuild is the build system used by the Linux kernel
-					- It consists of a set of Makefiles and Kconfig files
 
 					---
 
@@ -184,7 +185,7 @@
             <textarea data-template>
 				### Mini-Projects During the Semester
 
-				Throughout the semester we worked on smaller projects to help us with the main project.
+				Throughout the semester I worked on smaller projects to help with the main project.
 
 				---
 
@@ -194,15 +195,16 @@
 
 				--------------------------------------------
 				```bash
-				gcc -E source.c > source.i
+				gcc -E source.c -o source.i
 				```
 				Works for a single file, but not for the whole kernel
 				
-				Adding `-E` to the `CFLAGS` in the Makefile breaks the build system
+				Adding `-E` to the `CFLAGS` in the Makefile breaks the build system,
+				and no `*.i` files are generated since we had not specified the `*.i` targets.
 
 				---
-				```
-				make -C /path/to/kernel/source.i
+				```bash
+				make /path/to/kernel/source.i
 				```
 				Works, but:
 				- It is slow
@@ -213,7 +215,64 @@
 				- -j flag doesnt work
 				- slower than compiling the kernel (due to the many I/O operations) 
 
+				---
+				### Researched the Kbuild system
+
+				- Kbuild is the build system used by the Linux kernel
+				- It consists of a set of Makefiles and Kconfig files
+
 				
+			</textarea
+            >
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+					## Future Work
+
+					---
+					
+					### Improving the string locking approach
+
+					---
+
+					### Improving the config locking approach
+				</textarea
+            >
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+					## Conclusion
+
+					---
+
+					### What I learned
+
+					- How to use and modify the Kbuild system
+					- How the Linux kernel is architectured
+					- How to write efficient parsers
+
+					---
+					### Viability of the project
+
+					- There are partial solutions for this problem (see [bn_kconfig_recover](https://zznop.com/2022/01/02/automated-re-of-kernel-build-configs/))
+					- The current string-locking approach yields poor results
+					and this is due to the fact that my preprocessor output is not remotely accurate
+
+				</textarea
+            >
+          </section>
+        </section>
+
+        <section>
+          <section data-markdown>
+            <textarea data-template>
+				## Thank you for your attention!
 			</textarea
             >
           </section>
