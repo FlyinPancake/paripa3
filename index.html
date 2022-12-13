@@ -47,7 +47,7 @@
 				To be able to reconstruct the configuration of the Linux kernel from a kernel binary
 				with the least amount of user input possible.
 
-				Spoiler Alert <!-- .element: class="fragment" data-fragment-index="1" -->
+				<!-- Spoiler Alert .element: class="fragment" data-fragment-index="1" -->
 				---
 				### Constraints (for now)
 
@@ -91,7 +91,7 @@
 			## Starting Point
 			- The goal was to use the string literals in the source code to act as indicators for the configuration options.
 			- The approach should not be considered a failure, but the implementation was lacking crucial features.
-			- The approach from the previous semester was unable to yield remotely usable results
+			- The approach from the previous semester was unable to yield desirable results
 
 			---
 
@@ -102,28 +102,43 @@
 
 
 			---
+			## Ideas for potential improvements
 
-			### Improvement idea
-
-			1. Make a static analyzer that can output expressions for a like of code to be compiled into the kernel (e.g.: `CONFIG_FOO && CONFIG_BAR`)
-			2. Run this static analyzer for every unique string in the kernel source code.
-			3. We get a set of expressions for every string in the kernel source code. 
 			---
 
-			### Improvement idea (cont.)
+			### Improvement idea #1
+
+			1. Make a static analyzer that can output expressions for a line of code to be compiled into the kernel (e.g.: `CONFIG_FOO && CONFIG_BAR`)
+			2. Run this static analyzer for every unique string in the kernel source code.
+			3. That yields a set of expressions for every string in the kernel source code. 
+			---
+
+			<!-- ### Improvement idea (cont.)
 
 			4. There are powerful tools for solving boolean satisfiability problems (SAT)
 			5. We can use these tools to find a configuration that satisfies all the expressions for a string
 			6. We can then use this configuration to compile the kernel and check if the string exists in the compiled kernel
 
-			---
+			--- -->
 
 			### Possible problems
 
 			- The configuration space is too large to be solved by any SAT solver
 			- The SAT solver is too slow to solve the problem
 			- There are too many configurations that might satisfy the expressions
-			- Any error in the static analyzer will lead to a wrong configuration
+			- Any error in the static analyzer will lead to a wrong configuration 
+			
+			---
+			### Improvement idea #2
+			Use `gcc`'s preprocessor instead of my own preprocessing step
+
+			This seems pretty obvious, however I don't believe this is the best approach.
+			`gcc` needs a config and it can provide a preprocessed source code.
+			We need to find the config that produces a desired preprocessed source code.
+
+			---
+			![analyzer vs preprocessor](images/analyzer_vs_preprocessor.excalidraw.svg)
+
 		</textarea
             >
           </section>
@@ -161,7 +176,7 @@
 
 				---
 
-				### Getting the preprocessed source code (cont.)
+				### Getting the preprocessed source code
 
 				- Every C source file in the kernel has a corresponding `*.i` target
 				- If the source file would not be compiled into the kernel, the `*.i` target is not generated
@@ -254,29 +269,29 @@
         <section>
           <section data-markdown>
             <textarea data-template>
-					## Conclusion
+				## Conclusion
 
-					---
+				---
 
-					### What I learned
+				### What I learned
 
-					- How to use and modify the Kbuild system
-					- How the Linux kernel is architectured
-					- How to write efficient parsers
+				- How to use and modify the Kbuild system
+				- More about the Linux kernel architecture
+				- Writing efficient parsers
 
-					---
-					#### Don't make a graph of everything
+				---
+				#### Don't make a graph of everything
 
-					![graph of everything](images/linux_deps.png)
-					Graph of every dependency in the Linux kernel
+				![graph of everything](images/linux_deps.png)
+				Graph of every dependency in the Linux kernel
 
 
-					---
-					### Viability of the project
+				---
+				### Viability of the project
 
-					- There are partial solutions for this problem (see [bn_kconfig_recover](https://zznop.com/2022/01/02/automated-re-of-kernel-build-configs/))
-					- The current string-locking approach yields poor results
-					and this is due to the fact that my preprocessor output is not remotely accurate
+				- There are partial solutions for this problem (see [bn_kconfig_recover](https://zznop.com/2022/01/02/automated-re-of-kernel-build-configs/))
+				- The current string-locking approach yields poor results
+				and this is due to the fact that my preprocessor output is not remotely accurate
 
 				</textarea
             >
